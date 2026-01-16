@@ -1,0 +1,58 @@
+/* Global Font Application */
+body, input, button, .suggestion-item, #timerDisplay, .airplane-overlay { 
+    margin: 0; 
+    font-family: 'Inconsolata', monospace; 
+    background: #0b1c2d; 
+    color: white; 
+    overflow: hidden; 
+}
+
+#map { position: absolute; inset: 0; width: 100%; z-index: 1; }
+
+/* Panel & Search */
+.panel { position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.95); padding: 20px; border-radius: 15px; width: 280px; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
+.search-container { position: relative; width: 100%; margin-bottom: 10px; }
+.panel input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #020617; color: #fbbf24; box-sizing: border-box; }
+.suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #1e293b; border: 1px solid #334155; z-index: 5000; max-height: 200px; overflow-y: auto; border-radius: 0 0 8px 8px; }
+.suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #0f172a; font-size: 0.85rem; color: #fbbf24; }
+.suggestion-item:hover { background: #334155; }
+
+#boardingBtn { width: 100%; padding: 12px; background: #fbbf24; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 5px; }
+#boardingBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+#resetBtn { width: 100%; background: transparent; color: #94a3b8; border: none; cursor: pointer; font-size: 0.8rem; }
+
+/* Airplane Overlay */
+.airplane-overlay { position: fixed; inset: 0; background: #050a0f; z-index: 2000; }
+.airplane-scroll-container { height: 100vh; overflow-y: auto; display: flex; justify-content: center; padding: 80px 0 200px 0; scrollbar-width: none; }
+.airplane-silhouette { width: 400px; background: #1e293b; border: 4px solid #334155; border-radius: 200px 200px 50px 50px; height: fit-content; }
+
+.plane-nose { height: 180px; background: #2d3a4f; border-radius: 200px 200px 0 0; border-bottom: 2px solid #334155; }
+.plane-tail { height: 120px; background: #2d3a4f; border-radius: 0 0 50px 50px; border-top: 2px solid #334155; }
+
+/* Seating */
+.seat-grid { display: grid; grid-template-columns: 30px 55px 25px 55px 55px 25px 55px; gap: 12px; padding: 20px; justify-content: center; align-items: center; }
+.seat-letter-header { display: grid; grid-template-columns: 30px 55px 25px 55px 55px 25px 55px; gap: 12px; text-align: center; color: #fbbf24; font-weight: bold; padding: 20px; }
+.letter-spacer { width: 25px; }
+
+.seat-box { width: 55px; height: 55px; background: #334155; border: 1px solid #475569; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.seat-box.taken { background: #0f172a; border: 1px solid #ef4444; color: #ef4444; cursor: not-allowed; opacity: 0.5; }
+.seat-box.taken::after { content: 'X'; font-weight: bold; }
+.seat-box.selected { background: #fbbf24 !important; color: #000; font-weight: bold; box-shadow: 0 0 15px #fbbf24; border-color: #000; }
+
+/* UI Overlays */
+.plane-nav { position: fixed; top: 0; width: 100%; height: 60px; background: #0f172a; display: flex; align-items: center; padding: 0 20px; z-index: 2500; justify-content: space-between; box-sizing: border-box; border-bottom: 1px solid #334155; }
+.floating-footer { position: fixed; bottom: 0; width: 100%; height: 120px; background: linear-gradient(transparent, #050a0f 40%); display: flex; flex-direction: column; align-items: center; z-index: 2500; justify-content: center; }
+#confirmSeatBtn { padding: 18px 60px; background: #fbbf24; color: #000; border: none; border-radius: 50px; font-weight: 900; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+#confirmSeatBtn:disabled { background: #475569; color: #1e293b; cursor: not-allowed; box-shadow: none; }
+
+/* Tracker & Camera Toggle */
+.tracker-overlay { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 1500; }
+.timer-card { background: #0f172a; padding: 20px 40px; border-radius: 15px; border: 2px solid #fbbf24; text-align: center; color: #fbbf24; }
+#timerDisplay { font-size: 2.5rem; font-weight: bold; margin: 10px 0; }
+#timerLabel { font-size: 0.7rem; letter-spacing: 2px; }
+
+.toggle-btn { width: 100%; padding: 8px; margin-top: 10px; border: 1px solid #fbbf24; border-radius: 5px; background: transparent; color: #fbbf24; font-weight: bold; cursor: pointer; font-family: 'Inconsolata', monospace; }
+.toggle-btn.locked { background: #fbbf24; color: #0f172a; }
+.quit-btn { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-family: 'Inconsolata', monospace; }
+
+.hidden { display: none !important; }

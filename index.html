@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyFocus | Live Global Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="panel">
+  <h2 id="panelStatus">SkyFocus</h2>
+  <p class="instruction" id="panelInstruction">Search for an Airport or Click the Map</p>
+  
+  <div id="searchControls">
+    <div class="search-container">
+      <input id="fromInput" placeholder="Departure (e.g. London)" autocomplete="off">
+      <div id="fromSuggestions" class="suggestions hidden"></div>
+    </div>
+
+    <div class="search-container">
+      <input id="toInput" placeholder="Destination (e.g. Chennai)" autocomplete="off">
+      <div id="toSuggestions" class="suggestions hidden"></div>
+    </div>
+  </div>
+
+  <button id="boardingBtn" disabled>2. Enter Airplane</button>
+  <button id="resetBtn" onclick="location.reload()">Reset Selection</button>
+</div>
+
+<div id="airplaneView" class="airplane-overlay hidden">
+  <div class="plane-nav">
+    <button id="backToMapBtn">← Map View</button>
+    <div id="routeDisplay"></div>
+    <button id="quitBtn" class="quit-btn" onclick="location.reload()">QUIT</button>
+  </div>
+
+  <div class="airplane-scroll-container">
+    <div class="airplane-silhouette">
+      <div class="plane-nose">
+        <div class="cockpit-windows"></div>
+      </div>
+
+      <div class="cabin-section">
+        <div class="seat-letter-header">
+          <div class="row-label-spacer"></div>
+          <div class="letter">A</div>
+          <div class="letter-spacer"></div>
+          <div class="letter">B</div>
+          <div class="letter">C</div>
+          <div class="letter-spacer"></div>
+          <div class="letter">D</div>
+        </div>
+        <div id="seatMap" class="seat-grid"></div>
+      </div>
+
+      <div class="plane-tail"></div>
+    </div>
+  </div>
+
+  <div class="floating-footer">
+    <div id="selectedSeatLabel">Select a seat to initialize flight...</div>
+    <button id="confirmSeatBtn" disabled>CONFIRM SEAT SELECTION</button>
+  </div>
+</div>
+
+<div id="flightTrackerUI" class="tracker-overlay hidden">
+    <div class="timer-card">
+        <div id="timerLabel">ESTIMATED TIME TO ARRIVAL</div>
+        <div id="timerDisplay">00:00:00</div>
+        <button id="cameraLockBtn" class="toggle-btn locked">CAMERA: LOCKED</button>
+        <button class="quit-btn" onclick="location.reload()">ABORT FLIGHT</button>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
