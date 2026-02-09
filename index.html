@@ -32,15 +32,21 @@
     </div>
   </div>
 
+  <div id="routePreview" class="hidden" style="margin-bottom: 15px; text-align: center; border-top: 1px solid #334155; padding-top: 10px;">
+    <div style="font-size: 0.7rem; color: #94a3b8; letter-spacing: 1px;">ESTIMATED FLIGHT TIME</div>
+    <div id="previewTime" style="font-size: 1.4rem; color: #fbbf24; font-weight: bold;">00:00:00</div>
+  </div>
+
   <button id="boardingBtn" disabled>2. Enter Airplane</button>
-  <button id="resetBtn" onclick="location.reload()">Reset Selection</button>
+  <button id="resetBtn">Reset Selection</button>
 </div>
 
 <div id="airplaneView" class="airplane-overlay hidden">
-  <div class="plane-nav">
+  
+  <div class="plane-view-header">
+    <div id="routeDisplay"></div> 
     <button id="backToMapBtn">← Map View</button>
-    <div id="routeDisplay"></div>
-    <button id="quitBtn" class="quit-btn" onclick="location.reload()">QUIT</button>
+    <button id="quitBtn" class="quit-btn">QUIT</button>
   </div>
 
   <div class="airplane-scroll-container">
@@ -68,7 +74,7 @@
 
   <div class="floating-footer">
     <div id="selectedSeatLabel">Select a seat to initialize flight...</div>
-    <button id="confirmSeatBtn" disabled>CONFIRM SEAT SELECTION</button>
+    <button id="confirmSeatBtn" disabled>CONFIRM SEAT</button>
   </div>
 </div>
 

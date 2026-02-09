@@ -7,6 +7,15 @@ let flightPath = null;
 let airportLayer = L.layerGroup().addTo(map);
 let isCameraLocked = true;
 
+// --- DAY/NIGHT CALCULATOR ---
+function isDaylight(lon) {
+    const now = new Date();
+    // Calculate local solar hour: UTC hours + (longitude / 15 degrees per hour)
+    const localHour = (now.getUTCHours() + (lon / 15) + 24) % 24;
+    // Assume daylight is between 6 AM (6) and 6 PM (18)
+    return localHour >= 6 && localHour <= 18;
+}
+
 // 1. Initialization & Search
 async function init() {
     try {
@@ -24,7 +33,7 @@ function renderMarkers() {
         airportLayer.clearLayers();
         const zoom = map.getZoom();
         allAirports.forEach(ap => {
-            if (zoom >= 6 || ["LHR", "JFK", "DEL", "MAA", "BOM", "SIN"].includes(ap.iata)) {
+            if (zoom >= 6 || ["LHR", "JFK", "DEL", "MAA", "BOM", "SIN", "DXB"].includes(ap.iata)) {
                 if (map.getBounds().contains([ap.lat, ap.lon])) {
                     const m = L.circleMarker([ap.lat, ap.lon], { color: '#4fc3f7', radius: zoom >= 6 ? 4 : 2 });
                     m.on('click', () => handleMapClick(ap));
@@ -73,13 +82,25 @@ function handleMapClick(ap) {
 function checkBoarding() {
     if (selectedFrom && selectedTo) {
         document.getElementById('boardingBtn').disabled = false;
+        const distance = getDistance(selectedFrom.lat, selectedFrom.lon, selectedTo.lat, selectedTo.lon);
+        const totalSeconds = Math.floor((distance / 850) * 3600);
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+        const timeString = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        
+        const preview = document.getElementById('routePreview');
+        if(preview) {
+            document.getElementById('previewTime').innerText = timeString;
+            preview.classList.remove('hidden');
+        }
         drawFlightPath();
     }
 }
 
 // 2. Math & Physics Helpers
 function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth radius in km
+    const R = 6371; 
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -113,22 +134,36 @@ document.getElementById("cameraLockBtn").onclick = function() {
 
 document.getElementById("boardingBtn").onclick = () => {
     document.getElementById("airplaneView").classList.remove("hidden");
-    document.getElementById("routeDisplay").innerText = `${selectedFrom.iata} ✈ ${selectedTo.iata}`;
+    document.getElementById("routeDisplay").innerText = `${selectedFrom.iata} → ${selectedTo.iata}`;
+    
     const seatMap = document.getElementById("seatMap");
     seatMap.innerHTML = "";
+
     for (let i = 1; i <= 50; i++) {
         const rowNum = document.createElement("div");
-        rowNum.style.color = "#64748b"; rowNum.innerText = i;
+        rowNum.style.color = "#64748b"; 
+        rowNum.innerText = i;
         seatMap.appendChild(rowNum);
+
         ["A", "GAP", "B", "C", "GAP", "D"].forEach(type => {
-            if (type === "GAP") { seatMap.appendChild(document.createElement("div")); return; }
+            if (type === "GAP") { 
+                seatMap.appendChild(document.createElement("div")); 
+                return; 
+            }
+            
             const box = document.createElement("div");
             box.className = "seat-box";
-            if (Math.random() < 0.25) box.classList.add("taken");
-            else {
+            
+            if (Math.random() < 0.25) {
+                box.classList.add("taken");
+            } else {
                 box.onclick = () => {
-                    document.querySelectorAll(".seat-box").forEach(s => s.classList.remove("selected"));
+                    document.querySelectorAll(".seat-box").forEach(s => {
+                        s.classList.remove("selected");
+                        if (!s.classList.contains("taken")) s.innerText = "";
+                    });
                     box.classList.add("selected");
+                    box.innerText = `${i}${type}`; 
                     document.getElementById("confirmSeatBtn").disabled = false;
                     document.getElementById("selectedSeatLabel").innerText = `Seat ${i}${type} Selected`;
                 };
@@ -138,7 +173,7 @@ document.getElementById("boardingBtn").onclick = () => {
     }
 };
 
-// 4. Flight Execution
+// 4. Flight Execution with Day/Night Cycle
 document.getElementById("confirmSeatBtn").onclick = () => {
     document.getElementById("airplaneView").classList.add("hidden");
     document.querySelector(".panel").classList.add("hidden");
@@ -146,12 +181,8 @@ document.getElementById("confirmSeatBtn").onclick = () => {
 
     const start = [selectedFrom.lat, selectedFrom.lon];
     const end = [selectedTo.lat, selectedTo.lon];
-    
-    // Real-time duration (Distance / 850km/h cruise speed)
     const distance = getDistance(start[0], start[1], end[0], end[1]);
     const durationMS = (distance / 850) * 3600 * 1000;
-    
-    // Icon alignment (Bearing - 45deg for FontAwesome tilt)
     const angle = getBearing(start[0], start[1], end[0], end[1]);
 
     const planeIcon = L.divIcon({
@@ -168,13 +199,25 @@ document.getElementById("confirmSeatBtn").onclick = () => {
         
         const curLat = start[0] + (end[0] - start[0]) * progress;
         const curLon = start[1] + (end[1] - start[1]) * progress;
+        
         marker.setLatLng([curLat, curLon]);
+
+        // --- DYNAMIC LIGHTING LOGIC ---
+        const mapElement = document.getElementById('map');
+        const cabinElement = document.querySelector('.airplane-silhouette');
+        
+        if (isDaylight(curLon)) {
+            mapElement.classList.remove('night-map');
+            if (cabinElement) cabinElement.classList.remove('cabin-night');
+        } else {
+            mapElement.classList.add('night-map');
+            if (cabinElement) cabinElement.classList.add('cabin-night');
+        }
 
         if (isCameraLocked) {
             map.setView([curLat, curLon], map.getZoom(), { animate: false });
         }
 
-        // Timer Update (HH:MM:SS)
         let remaining = Math.max(0, durationMS - elapsed);
         let s = Math.floor(remaining / 1000);
         let h = Math.floor(s / 3600);
@@ -184,10 +227,12 @@ document.getElementById("confirmSeatBtn").onclick = () => {
             `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         
         if (progress < 1) requestAnimationFrame(animate);
-        else { alert(`Welcome to ${selectedTo.city}!`); location.reload(); }
+        else { alert(`Touchdown in ${selectedTo.city}!`); location.reload(); }
     }
     requestAnimationFrame(animate);
 };
 
 document.getElementById("backToMapBtn").onclick = () => document.getElementById("airplaneView").classList.add("hidden");
+document.getElementById("resetBtn").onclick = () => location.reload();
+
 init();
